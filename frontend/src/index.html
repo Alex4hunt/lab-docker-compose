@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Доска объявлений</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", Arial, sans-serif; background: #f2f4f8; margin: 0; color: #222; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 24px 16px; }
+  h1 { margin: 0 0 4px; }
+  .sub { color: #667; margin-bottom: 20px; }
+  .card { background: #fff; border-radius: 10px; padding: 18px; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(0,0,0,.07); }
+  button { padding: 10px 16px; border: 0; border-radius: 6px; background: #2563eb; color: #fff; font-size: 14px; cursor: pointer; margin: 4px 6px 4px 0; }
+  button:hover { background: #1d4ed8; }
+  button.green { background: #16a34a; }
+  button.green:hover { background: #15803d; }
+  button.red { background: #dc2626; padding: 6px 10px; margin: 0; }
+  input, select { padding: 9px; margin: 4px 4px 4px 0; border: 1px solid #ccd; border-radius: 6px; font-size: 14px; }
+  #msg { margin-top: 12px; padding: 10px 12px; border-radius: 6px; display: none; }
+  #msg.ok { display: block; background: #dcfce7; color: #166534; }
+  #msg.err { display: block; background: #fee2e2; color: #991b1b; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+  th { background: #f8fafc; font-size: 13px; color: #556; }
+  .rec { color: #15803d; font-weight: 700; }
+  .wrap-table { overflow-x: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Доска объявлений</h1>
+  <div class="sub">Расчёт рекомендуемой цены б/у товара</div>
+
+  <div class="card">
+    <button onclick="loadAds(true)">1. Показать объявления из БД</button>
+    <button class="green" onclick="recommendAll()">2. Рассчитать рекомендуемую цену (web-сервис)</button>
+    <div id="msg"></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Добавить объявление</h3>
+    <input id="title" placeholder="Название">
+    <select id="category">
+      <option value="electronics">Электроника</option>
+      <option value="furniture">Мебель</option>
+      <option value="clothes">Одежда</option>
+      <option value="other">Другое</option>
+    </select>
+    <input id="price" type="number" placeholder="Цена нового, $">
+    <input id="age" type="number" placeholder="Возраст, мес.">
+    <select id="condition">
+      <option value="excellent">Отличное</option>
+      <option value="good">Хорошее</option>
+      <option value="fair">Среднее</option>
+      <option value="poor">Плохое</option>
+    </select>
+    <button onclick="addAd()">Добавить</button>
+  </div>
+
+  <div class="card wrap-table">
+    <table>
+      <thead><tr>
+        <th>ID</th><th>Название</th><th>Категория</th><th>Цена нового, $</th>
+        <th>Возраст, мес.</th><th>Состояние</th><th>Рекомендуемая цена, $</th><th></th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const CAT = { electronics: "Электроника", furniture: "Мебель", clothes: "Одежда", other: "Другое" };
+const COND = { excellent: "Отличное", good: "Хорошее", fair: "Среднее", poor: "Плохое" };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function show(text, ok = true) {
+  const m = document.getElementById("msg");
+  m.className = ok ? "ok" : "err";
+  m.textContent = text;
+}
+
+async function loadAds(notify = false) {
+  try {
+    const r = await fetch("/api/ads");
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const ads = await r.json();
+    document.getElementById("rows").innerHTML = ads.map(a => `
+      <tr>
+        <td>${a.id}</td><td>${esc(a.title)}</td><td>${esc(CAT[a.category] || a.category)}</td>
+        <td>${a.original_price}</td><td>${a.age_months}</td><td>${esc(COND[a.condition] || a.condition)}</td>
+        <td class="rec">${a.recommended_price ?? "—"}</td>
+        <td><button class="red" onclick="delAd(${a.id})">Удалить</button></td>
+      </tr>`).join("");
+    if (notify) show("Данные получены из БД через backend. Записей: " + ads.length + " (" + new Date().toLocaleTimeString() + ")");
+  } catch (e) { show("Ошибка: " + e.message, false); }
+}
+
+async function recommendAll() {
+  try {
+    const r = await fetch("/api/recommend-all", { method: "POST" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    await loadAds();
+    show("Цены рассчитаны web-сервисом и сохранены в БД");
+  } catch (e) { show("Ошибка: " + e.message, false); }
+}
+
+async function addAd() {
+  const body = {
+    title: document.getElementById("title").value,
+    category: document.getElementById("category").value,
+    original_price: document.getElementById("price").value,
+    age_months: document.getElementById("age").value,
+    condition: document.getElementById("condition").value,
+  };
+  if (!body.title || !body.original_price || !body.age_months) {
+    show("Заполни название, цену и возраст", false);
+    return;
+  }
+  await fetch("/api/ads", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body) });
+  await loadAds();
+  show("Объявление добавлено в БД");
+}
+
+async function delAd(id) {
+  await fetch("/api/ads/" + id, { method: "DELETE" });
+  await loadAds();
+  show("Объявление удалено");
+}
+
+loadAds();
+</script>
+</body>
+</html>
