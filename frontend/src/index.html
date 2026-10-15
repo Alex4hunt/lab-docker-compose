@@ -6,36 +6,72 @@
 <title>Доска объявлений</title>
 <style>
   * { box-sizing: border-box; }
-  body { font-family: "Segoe UI", Arial, sans-serif; background: #f2f4f8; margin: 0; color: #222; }
-  .wrap { max-width: 1000px; margin: 0 auto; padding: 24px 16px; }
-  h1 { margin: 0 0 4px; }
-  .sub { color: #667; margin-bottom: 20px; }
-  .card { background: #fff; border-radius: 10px; padding: 18px; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(0,0,0,.07); }
-  button { padding: 10px 16px; border: 0; border-radius: 6px; background: #2563eb; color: #fff; font-size: 14px; cursor: pointer; margin: 4px 6px 4px 0; }
-  button:hover { background: #1d4ed8; }
-  button.green { background: #16a34a; }
-  button.green:hover { background: #15803d; }
-  button.red { background: #dc2626; padding: 6px 10px; margin: 0; }
-  input, select { padding: 9px; margin: 4px 4px 4px 0; border: 1px solid #ccd; border-radius: 6px; font-size: 14px; }
-  #msg { margin-top: 12px; padding: 10px 12px; border-radius: 6px; display: none; }
+  body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; color: #1f2937; background: #f1f5f9; }
+  .hero { background: linear-gradient(135deg, #2563eb, #7c3aed); color: #fff; padding: 40px 16px; text-align: center; }
+  .hero h1 { margin: 0 0 8px; font-size: 34px; }
+  .hero p { margin: 0; opacity: .9; }
+  .wrap { max-width: 1050px; margin: 0 auto; padding: 20px 16px; }
+  .card { background: #fff; border-radius: 12px; padding: 18px; margin-bottom: 18px; box-shadow: 0 2px 10px rgba(0,0,0,.07); }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+  .step { background: #eef2ff; border-radius: 10px; padding: 12px; font-size: 14px; }
+  .step b { display: block; margin-bottom: 4px; }
+  button { padding: 10px 16px; border: 0; border-radius: 8px; background: #2563eb; color: #fff; font-size: 14px; cursor: pointer; margin: 4px 6px 4px 0; transition: .2s; }
+  button:hover { background: #1d4ed8; transform: translateY(-2px); }
+  button.green { background: #16a34a; } button.green:hover { background: #15803d; }
+  button.red { background: #ef4444; padding: 6px 10px; margin: 0; } button.red:hover { background: #dc2626; }
+  input, select { padding: 9px; margin: 4px 4px 4px 0; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
+  #msg { margin-top: 10px; padding: 10px 12px; border-radius: 8px; display: none; }
   #msg.ok { display: block; background: #dcfce7; color: #166534; }
   #msg.err { display: block; background: #fee2e2; color: #991b1b; }
-  table { border-collapse: collapse; width: 100%; }
-  th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; }
-  th { background: #f8fafc; font-size: 13px; color: #556; }
-  .rec { color: #15803d; font-weight: 700; }
-  .wrap-table { overflow-x: auto; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+  .ad { background: #fff; border-radius: 14px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,.08); transition: .25s; animation: fade .5s ease; }
+  .ad:hover { transform: translateY(-6px); box-shadow: 0 10px 24px rgba(0,0,0,.15); }
+  @keyframes fade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  .icon { font-size: 46px; text-align: center; background: #f1f5f9; border-radius: 10px; padding: 12px; }
+  .ad h3 { margin: 12px 0 4px; font-size: 17px; }
+  .tags { font-size: 12px; color: #64748b; margin-bottom: 8px; }
+  .row { display: flex; justify-content: space-between; font-size: 14px; margin: 3px 0; }
+  .rec { color: #15803d; font-weight: 700; font-size: 20px; }
+  .bar { height: 8px; background: #e2e8f0; border-radius: 6px; overflow: hidden; margin: 8px 0 4px; }
+  .bar div { height: 100%; background: linear-gradient(90deg, #22c55e, #16a34a); transition: width 1s; }
+  .small { font-size: 12px; color: #64748b; }
 </style>
 </head>
 <body>
+<div class="hero">
+  <h1>🛒 Доска объявлений</h1>
+  <p>Подскажем, за сколько выгодно продать вашу б/у вещь</p>
+</div>
+
 <div class="wrap">
-  <h1>Доска объявлений</h1>
-  <div class="sub">Расчёт рекомендуемой цены б/у товара</div>
+  <div class="card">
+    <h3 style="margin-top:0">Как это работает</h3>
+    <div class="steps">
+      <div class="step"><b>1. Объявления</b>Ваши объявления хранятся в базе данных PostgreSQL.</div>
+      <div class="step"><b>2. Расчёт</b>Web-сервис считает цену по возрасту, категории и состоянию вещи.</div>
+      <div class="step"><b>3. Рекомендуемая цена</b>Это цена, за которую разумно продавать б/у вещь. Чем старше и хуже состояние, тем она ниже.</div>
+    </div>
+  </div>
 
   <div class="card">
     <button onclick="loadAds(true)">1. Показать объявления из БД</button>
     <button class="green" onclick="recommendAll()">2. Рассчитать рекомендуемую цену (web-сервис)</button>
     <div id="msg"></div>
+    <hr style="border:0;border-top:1px solid #e2e8f0;margin:14px 0">
+    <input id="search" placeholder="🔍 Поиск по названию" oninput="render()">
+    <select id="filter" onchange="render()">
+      <option value="">Все категории</option>
+      <option value="electronics">Электроника</option>
+      <option value="furniture">Мебель</option>
+      <option value="clothes">Одежда</option>
+      <option value="other">Другое</option>
+    </select>
+    <select id="sort" onchange="render()">
+      <option value="id">Сортировка: по порядку</option>
+      <option value="cheap">Сначала дешёвые</option>
+      <option value="expensive">Сначала дорогие</option>
+      <option value="old">Сначала старые</option>
+    </select>
   </div>
 
   <div class="card">
@@ -58,21 +94,15 @@
     <button onclick="addAd()">Добавить</button>
   </div>
 
-  <div class="card wrap-table">
-    <table>
-      <thead><tr>
-        <th>ID</th><th>Название</th><th>Категория</th><th>Цена нового, $</th>
-        <th>Возраст, мес.</th><th>Состояние</th><th>Рекомендуемая цена, $</th><th></th>
-      </tr></thead>
-      <tbody id="rows"></tbody>
-    </table>
-  </div>
+  <div id="cards" class="grid"></div>
 </div>
 
 <script>
 const CAT = { electronics: "Электроника", furniture: "Мебель", clothes: "Одежда", other: "Другое" };
+const ICON = { electronics: "📱", furniture: "🛋️", clothes: "🧥", other: "🚲" };
 const COND = { excellent: "Отличное", good: "Хорошее", fair: "Среднее", poor: "Плохое" };
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let ADS = [];
 
 function show(text, ok = true) {
   const m = document.getElementById("msg");
@@ -80,19 +110,38 @@ function show(text, ok = true) {
   m.textContent = text;
 }
 
+function render() {
+  const q = document.getElementById("search").value.toLowerCase();
+  const f = document.getElementById("filter").value;
+  const s = document.getElementById("sort").value;
+  let list = ADS.filter(a => a.title.toLowerCase().includes(q) && (!f || a.category === f));
+  if (s === "cheap") list.sort((a, b) => a.original_price - b.original_price);
+  if (s === "expensive") list.sort((a, b) => b.original_price - a.original_price);
+  if (s === "old") list.sort((a, b) => b.age_months - a.age_months);
+  document.getElementById("cards").innerHTML = list.map(a => {
+    const has = a.recommended_price !== null && a.recommended_price !== undefined;
+    const pct = has ? Math.round(100 * a.recommended_price / a.original_price) : 0;
+    return `
+    <div class="ad">
+      <div class="icon">${ICON[a.category] || "📦"}</div>
+      <h3>${esc(a.title)}</h3>
+      <div class="tags">${esc(CAT[a.category] || a.category)} · ${esc(COND[a.condition] || a.condition)} · ${a.age_months} мес.</div>
+      <div class="row"><span>Цена нового</span><span>$${a.original_price}</span></div>
+      <div class="row"><span>Рекомендуем</span><span class="rec">${has ? "$" + a.recommended_price : "—"}</span></div>
+      <div class="bar"><div style="width:${pct}%"></div></div>
+      <div class="small">${has ? pct + "% от цены нового" : "Нажмите кнопку 2 для расчёта"}</div>
+      <div style="margin-top:10px"><button class="red" onclick="delAd(${a.id})">Удалить</button></div>
+    </div>`;
+  }).join("") || "<div class='card'>Ничего не найдено</div>";
+}
+
 async function loadAds(notify = false) {
   try {
     const r = await fetch("/api/ads");
     if (!r.ok) throw new Error("HTTP " + r.status);
-    const ads = await r.json();
-    document.getElementById("rows").innerHTML = ads.map(a => `
-      <tr>
-        <td>${a.id}</td><td>${esc(a.title)}</td><td>${esc(CAT[a.category] || a.category)}</td>
-        <td>${a.original_price}</td><td>${a.age_months}</td><td>${esc(COND[a.condition] || a.condition)}</td>
-        <td class="rec">${a.recommended_price ?? "—"}</td>
-        <td><button class="red" onclick="delAd(${a.id})">Удалить</button></td>
-      </tr>`).join("");
-    if (notify) show("Данные получены из БД через backend. Записей: " + ads.length + " (" + new Date().toLocaleTimeString() + ")");
+    ADS = await r.json();
+    render();
+    if (notify) show("Данные получены из БД через backend. Записей: " + ADS.length + " (" + new Date().toLocaleTimeString() + ")");
   } catch (e) { show("Ошибка: " + e.message, false); }
 }
 
@@ -119,7 +168,7 @@ async function addAd() {
   }
   await fetch("/api/ads", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body) });
   await loadAds();
-  show("Объявление добавлено в БД");
+  show("Объявление добавлено в БД. Нажми кнопку 2, чтобы рассчитать цену");
 }
 
 async function delAd(id) {
