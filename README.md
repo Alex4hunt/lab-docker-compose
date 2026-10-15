@@ -21,3 +21,28 @@
 1. Кнопка «Показать объявления из БД» — frontend -> backend -> PostgreSQL.
 2. Кнопка «Рассчитать рекомендуемую цену» — frontend -> backend -> web-service,
    результат сохраняется в БД и показывается в таблице.
+
+   
+## Структура проекта
+
+```
+lab-docker-compose/
+├── docker-compose.yml
+├── README.md
+├── .gitignore
+├── frontend/
+│   ├── Dockerfile
+│   ├── nginx.conf
+│   └── src/
+│       └── index.html
+├── backend/
+│   ├── Dockerfile
+│   ├── main.py
+│   └── requirements.txt
+├── db/
+│   └── init.sql
+└── web-service/
+    ├── Dockerfile
+    ├── requirements.txt
+    └── service.py
+```
